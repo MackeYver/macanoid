@@ -69,9 +69,9 @@ const g_levels_data: number[][] = [
         0,  0,  6,  6,  4,  4,  4,  4,  4,  6,  6,  0,  0,
         0,  0,  0,  6,  6,  6,  6,  6,  6,  6,  0,  0,  0,
         0,  0,  0,  0,  6,  6,  6,  6,  6,  0,  0,  0,  0,
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,        
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,        
+        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     ],
 
@@ -91,7 +91,7 @@ const g_levels_data: number[][] = [
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-   ],    
+   ],
 
     [ // 5
         0,  0,  0,  0,  0,  3,  3,  3,  0,  0,  0,  0,  0,
@@ -129,7 +129,7 @@ const g_levels_data: number[][] = [
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
         0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     ],
-    */   
+    */
 ];
 
 const g_levels_backgrounds: number[] = [
@@ -155,9 +155,9 @@ const g_block_values: number[] = [
 
 let g_block_normals: Vector2[] = [
     {x: -1, y:  0},
-    {x:  0, y:  1}, 
+    {x:  0, y:  1},
     {x:  1, y:  0},
-    {x:  0, y: -1},        
+    {x:  0, y: -1},
 ];
 
 interface Powerup_Probability {
@@ -169,26 +169,26 @@ interface Powerup_Probability {
 const g_block_powerup_probs: Powerup_Probability[] = [
     {prob:0   , allowed_powerups:[]       , allowed_powerups_prob:[]},
     {prob:0.2 , allowed_powerups:[0]      , allowed_powerups_prob:[1]},
-    {prob:0.25, allowed_powerups:[0]      , allowed_powerups_prob:[1]},
-    {prob:0.2 , allowed_powerups:[0, 1]   , allowed_powerups_prob:[0.5, 1]},
-    {prob:0.25, allowed_powerups:[0, 1]   , allowed_powerups_prob:[0.3, 1]},
-    {prob:0.3 , allowed_powerups:[0, 1, 2], allowed_powerups_prob:[0.4, 0.6, 1]},
+    {prob:0.25, allowed_powerups:[0, 1]   , allowed_powerups_prob:[0.75, 1]},
+    {prob:0.2 , allowed_powerups:[0, 1, 2], allowed_powerups_prob:[0.25, 0.5, 1]},
+    {prob:0.25, allowed_powerups:[1, 2]   , allowed_powerups_prob:[0.3, 1]},
+    {prob:0.3 , allowed_powerups:[1, 2, 3], allowed_powerups_prob:[0.4, 0.6, 1]},
     {prob:0   , allowed_powerups:[]       , allowed_powerups_prob:[]},
 ];
 
 const g_powerup_value: number[] = [
     50, // Paddle
+    50, // Reset ball velocity
     50, // Lasers
     50, // Ball_Is_Op
-    //100,
     //100,
 ];
 
 const g_powerup_duration: number[] = [
     25,
+    1, // A one-time effect, it will slow down the ball immediately
     10,
     15,
-    //10,
     //10,
 ];
 
@@ -235,13 +235,13 @@ function dot(A: Vector2, B: Vector2): number {
     return result;
 }
 
-function magnitude(A: Vector2): number {    
+function magnitude(A: Vector2): number {
     let square: number = A.x * A.x + A.y * A.y;
     return Math.sqrt(square);
 }
 
 // Normalize Or Zero (NOZ)
-function noz(A: Vector2): Vector2 { 
+function noz(A: Vector2): Vector2 {
     let result: Vector2 = {x: 0, y: 0};
 
     let square: number = A.x * A.x + A.y * A.y;
@@ -250,7 +250,7 @@ function noz(A: Vector2): Vector2 {
         result.x = A.x / length;
         result.y = A.y / length;
     }
-    
+
     return result;
 }
 
@@ -278,7 +278,7 @@ function calculate_line_intersection(P1: Vector2, P2: Vector2, P3: Vector2, P4: 
     let denominator = (A.y * B.x) - (A.x * B.y);
     let numerator_a = (B.y * C.x) - (B.x * C.y);
     let numerator_b: number = 0;
-    
+
     let collision_is_still_possible: boolean = true;
     if (denominator > 0) {
         if (numerator_a < 0 || numerator_a > denominator) {
@@ -302,7 +302,7 @@ function calculate_line_intersection(P1: Vector2, P2: Vector2, P3: Vector2, P4: 
     }
 
     if (collision_is_still_possible && !approx_equal(denominator, 0, 0.01)) {
-        let a: number = numerator_a / denominator;        
+        let a: number = numerator_a / denominator;
 
         if ((a >= 0 && a <= 1)) {
             P = add(P1, smul(a, A));
@@ -311,7 +311,7 @@ function calculate_line_intersection(P1: Vector2, P2: Vector2, P3: Vector2, P4: 
             collision_is_still_possible = false;
         }
     }
-    
+
 
     let exists = collision_is_still_possible;
     return {exists, P};
@@ -324,7 +324,7 @@ interface Rectangle_Info {
 
 function compute_rect_info(size: Vector2, ball_radius: number) {
     // Compute some stuff for the collision detector
-    // The block's corners in block-space   
+    // The block's corners in block-space
     let _2r = 2 * ball_radius;
     let w = size.x + _2r;
     let h = size.y + _2r;
@@ -333,8 +333,8 @@ function compute_rect_info(size: Vector2, ball_radius: number) {
     let P1: Vector2 = add(P0, new_vector(0, h));
     let P2: Vector2 = add(P1, new_vector(w, 0));
     let P3: Vector2 = sub(P2, new_vector(0, h));
-    
-    
+
+
     // Line segments of the block (in block-space)
     let lines: Vector2[][] = [];
     lines = [
@@ -362,11 +362,11 @@ interface Collision_Info {
 
 function check_moving_circle_vs_static_rect(circle_P: Vector2, old_circle_P: Vector2, rect: Rectangle_Info): Collision_Info {
     let collision: Collision_Info = {} as Collision_Info;
-    
+
     // Translate the circle into the rectangle's space
     circle_P = sub(circle_P, rect.Po);
     old_circle_P = sub(old_circle_P, rect.Po);
-    
+
     //collision.I = noz(sub(old_circle_P, circle_P));
     let min_distance: number = 9999999999999;
     let I_dot_N: number = 0;
@@ -380,9 +380,9 @@ function check_moving_circle_vs_static_rect(circle_P: Vector2, old_circle_P: Vec
             if (distance < min_distance) {
                 min_distance = distance;
                 collision.I = noz(sub(old_circle_P, line_intersection.P));
-                collision.N = g_block_normals[line_index];                
+                collision.N = g_block_normals[line_index];
                 I_dot_N = dot(collision.I, collision.N);
-                collision.interpenetration = magnitude(sub(circle_P, line_intersection.P)) + 1;                
+                collision.interpenetration = magnitude(sub(circle_P, line_intersection.P)) + 1;
             }
         }
     }
@@ -392,7 +392,7 @@ function check_moving_circle_vs_static_rect(circle_P: Vector2, old_circle_P: Vec
         let IN: Vector2 = smul(I_dot_N, collision.N);
         collision.R = sub(smul(2, IN), collision.I); // R = (2 * (I.N)N)) - I
     }
-    
+
     return collision;
 }
 
@@ -442,7 +442,7 @@ class Renderer {
         context.lineJoin    = "round";
         context.strokeStyle = "black";
         context.lineWidth   = 1;
-        
+
         //
         // Load resources
         // Backgrounds
@@ -454,7 +454,7 @@ class Renderer {
         ];
 
         for (let index = 0; index < background_image_names.length; ++index) {
-            let image = new Image();            
+            let image = new Image();
             image.src = background_image_names[index];
             image.onload = () => {
                 let pattern = this.canvas_ctx.createPattern(image, "repeat");
@@ -479,8 +479,8 @@ class Renderer {
             "data\\bitmaps\\powerup_3.png",
             "data\\bitmaps\\powerup_4.png",
             "data\\bitmaps\\powerup_5.png",
-            "data\\bitmaps\\powerup_4.png", // LASER
-        ];        
+            "data\\bitmaps\\powerup_4.png",
+        ];
 
         for (let index = 0; index < image_names.length; ++index) {
             let image = new Image();
@@ -489,7 +489,7 @@ class Renderer {
         }
 
 
-        this.canvas = canvas;        
+        this.canvas = canvas;
         this.canvas_ctx = context;
         this.resize();
     }
@@ -501,7 +501,7 @@ class Renderer {
         canvas.height = window.innerHeight;
         this.canvas_size = new_vector(this.canvas.width, this.canvas.height);
     }
-    
+
 
     //
     // Draw calls
@@ -517,7 +517,7 @@ class Renderer {
             let ctx = this.canvas_ctx;
             ctx.beginPath();
             ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);            
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
     }
 
@@ -540,7 +540,7 @@ class Renderer {
     public draw_text(P: Vector2, size: number, text: string) {
         this.canvas_ctx.font = size + "px Verdana";
         this.canvas_ctx.textAlign = "center";
-        this.canvas_ctx.fillText(text, P.x, P.y);        
+        this.canvas_ctx.fillText(text, P.x, P.y);
     }
 }
 
@@ -592,14 +592,14 @@ class Sound {
 
     play(sound_id: number) {
         sound_id = sound_id >= this.data.length ? this.data.length - 1 : sound_id;
-        //this.data[sound_id].play();
+        this.data[sound_id].play();
     }
 };
 
 
 
 
-// 
+//
 // Ball
 //
 
@@ -610,11 +610,11 @@ class Ball {
     radius: number = 1;
     size: Vector2 = new_vector(0, 0);
     half_size: Vector2 = new_vector(0, 0);
-    
+
     start_speed: number = 0.35;
     max_speed: number = 2;
     speed_increase_factor: number = 1.025;
-    
+
     P: Vector2    = new_vector(0, 0);
     oldP: Vector2 = new_vector(0, 0);
     dP: Vector2   = new_vector(0, 0); // fraction of dp_scale (i.e. the actual velocity is dP * dp_scale).
@@ -668,7 +668,7 @@ class Ball {
         }
         else if (top) {
             this.P.y = this.radius + 1;
-            this.dP.y *= -1;      
+            this.dP.y *= -1;
         }
     }
 
@@ -706,12 +706,12 @@ class Player {
     renderer: Renderer;
     sound: Sound;
 
-    P: Vector2 = new_vector(0, 0);    
+    P: Vector2 = new_vector(0, 0);
     move_target_x: number = 0;
-    original_size: Vector2 = new_vector(10, 10);    
+    original_size: Vector2 = new_vector(10, 10);
     current_size: Vector2 = new_vector(10, 10);
-    
-    lives: number = 3;
+
+    lives: number = 5;
     score: number = 0;
 
     wide_remaining_time = 0;
@@ -738,10 +738,10 @@ class Player {
         this.current_size = mul(new_vector(wide_factor, 1), this.original_size);
         let s = 0.7 * block_size.y;
         this.laser_beam_size = new_vector(0.5 * s, s);
-    }    
+    }
 
 
-    public reset() {        
+    public reset() {
         this.remove_wide();
         this.remove_lasers();
     }
@@ -755,7 +755,7 @@ class Player {
         ball.dP = new_vector(0, 0);
         ball.oldP = ball.P;
     }
-    
+
 
     public serve_ball(ball: Ball) {
         let S: Vector2 = noz(new_vector(-0.0025 * (this.P.x - this.move_target_x), -1));
@@ -796,26 +796,27 @@ class Player {
 
             let P = new_vector(this.P.x - x, this.P.y - y);
             this.laser_beams.push(P);
+            this.sound.play(SoundID.Laser);
         }
     }
 
 
     public update(dt: DOMHighResTimeStamp) {
-        let size = this.current_size;        
-        let half_width: number = 0.5 * size.x;    
-        
+        let size = this.current_size;
+        let half_width: number = 0.5 * size.x;
+
         //
         // Position
         this.P.x += 0.1 * (this.move_target_x - this.P.x);
         this.P.x = Math.max(half_width, Math.min(this.renderer.canvas.width - half_width, this.P.x));
-        
+
 
         //
         // Wide
         if (this.wide_remaining_time > 0) {
             this.wide_remaining_time -= dt;
             if (this.wide_remaining_time <= 0) {
-                this.remove_wide();                
+                this.remove_wide();
             }
         }
 
@@ -842,7 +843,7 @@ class Player {
     }
 
 
-    public render() {        
+    public render() {
         let renderer = this.renderer;
         let size = this.current_size;
         let half_size = smul(0.5, size);
@@ -897,10 +898,10 @@ class Player {
 
 enum Powerup_Type {
     Wide_Paddle = 0,
-    Lasers,    
+    Slow_Down,
+    Lasers,
     Ball_Is_Op,
     //Multiple_Balls,
-    //Last,
 };
 
 interface Powerup {
@@ -923,7 +924,7 @@ class Game_Objects {
     blocks_remaining: number = 0;
 
     dropping_powerups: Powerup[] = [];
-    powerup_size: Vector2 = new_vector(0, 0);    
+    powerup_size: Vector2 = new_vector(0, 0);
 
 
     constructor(renderer: Renderer, sound: Sound) {
@@ -958,7 +959,7 @@ class Game_Objects {
 
 
     public reset() {
-        this.dropping_powerups = [];        
+        this.dropping_powerups = [];
     }
 
 
@@ -988,7 +989,7 @@ class Game_Objects {
     public add_powerup(block_id: number, P: Vector2) {
         if (block_id >= 0 && block_id < (g_block_powerup_probs.length - 1)) {
             let block_powerup = g_block_powerup_probs[block_id];
-            let rand = Math.random();           
+            let rand = Math.random();
 
             if (rand <= block_powerup.prob) {
                 let powerup = {} as Powerup;
@@ -1002,19 +1003,19 @@ class Game_Objects {
                         break;
                     }
                 }
-                
+
                 let size = this.powerup_size;
                 let half_size = smul(0.5, size);
                 P = sub(P, half_size);
                 P.x = Math.max(0, Math.min(this.renderer.canvas.width - size.x, P.x));
                 powerup.P = P;
 
-                this.dropping_powerups.push(powerup);                
+                this.dropping_powerups.push(powerup);
             }
         }
     }
 
-    
+
     public update(dt: DOMHighResTimeStamp, player: Player): Powerup[] {
         //
         // Powerups
@@ -1038,19 +1039,19 @@ class Game_Objects {
 
             if (powerup.P.y > this.renderer.canvas.height) {
                 dropping_powerups.splice(index, 1);
-            }            
+            }
             else {
-                let powerup_mid = add(powerup.P, powerup_half_size);                
+                let powerup_mid = add(powerup.P, powerup_half_size);
 
-                if ((powerup_mid.x >= player_min.x) && (powerup_mid.x <= player_max.x) && 
-                    (powerup_mid.y >= player_min.y) && (powerup_mid.y <= player_max.y)) 
+                if ((powerup_mid.x >= player_min.x) && (powerup_mid.x <= player_max.x) &&
+                    (powerup_mid.y >= player_min.y) && (powerup_mid.y <= player_max.y))
                 {
                     picked_up_powerups.push(powerup);
                     player.score += g_powerup_value[powerup.type];
                     dropping_powerups.splice(index, 1);
                 }
             }
-        }        
+        }
 
         return picked_up_powerups;
     }
@@ -1110,11 +1111,11 @@ class Game {
 
     is_running: boolean;
     last_update: DOMHighResTimeStamp = 0;
-    
+
     player: Player;
     ball: Ball;
     game_objects: Game_Objects;
-    
+
     curr_level_index: number = 0;
     curr_mode: Game_Mode = Game_Mode.Serving;
 
@@ -1122,19 +1123,19 @@ class Game {
 
     //
     // Init
-    constructor() {        
-        this.renderer = new Renderer();        
+    constructor() {
+        this.renderer = new Renderer();
         let renderer: Renderer = this.renderer;
 
         this.sound = new Sound();
         let sound = this.sound;
 
-        this.game_objects = new Game_Objects(renderer, sound);        
+        this.game_objects = new Game_Objects(renderer, sound);
         this.game_objects.init_level(g_levels_data[this.curr_level_index]);
 
         this.player = new Player(renderer, sound);
         this.ball = new Ball(renderer, sound);
-        
+
         this.resize();
         this.is_running = true;
 
@@ -1146,7 +1147,7 @@ class Game {
         canvas.addEventListener("touchmove" , this.move_event_handler);
 
         window.addEventListener("resize", this.resize, false);
-        
+
         window.requestAnimationFrame(this.update_and_render);
     }
 
@@ -1166,31 +1167,32 @@ class Game {
         game_objects.resize();
         ball.resize(block_size);
         player.resize(block_size);
-        
+
         // Move the player if neccessary
         let canvas_width  = renderer.canvas.width;
         let canvas_height = renderer.canvas.height;
-        player.P.y = canvas_height - 4 * player_size.y;
+        player.P.y = canvas_height - 10 * player_size.y;
 
 
         // Move the ball
-        // TODO: this makes it possible to cheat, fix this (or do we allow it for the laughs?)        
+        // TODO: this makes it possible to cheat, fix this (or do we allow it for the laughs?)
         if ((ball.P.y + ball.radius) > (player.P.y - player_size.y)) {
             ball.P.y = player.P.y - 3 * player_size.y;
         }
-        
+
         if ((ball.P.x + ball.radius) > canvas_width) {
             ball.P.x = canvas_width - 3 * ball.radius;
         }
-    }   
+    }
 
 
-    //    
+    //
     // Input
     //private press_event_handler = (e: MouseEvent | TouchEvent) => {
     private press_event_handler = () => {
         let curr_mode = this.curr_mode;
         let player = this.player;
+        let ball = this.ball;
 
         switch (curr_mode) {
             case Game_Mode.Playing: {
@@ -1212,7 +1214,9 @@ class Game {
             } break;
 
             case Game_Mode.Game_Over: {
-                player.lives = 3;
+                player.reset();
+                ball.reset();
+                player.lives = 5;
                 player.score = 0;
                 this.curr_level_index = 0;
                 this.game_objects.init_level(g_levels_data[0]);
@@ -1221,15 +1225,17 @@ class Game {
 
             case Game_Mode.Won_Level: {
                 player.reset();
+                ball.reset();
                 this.curr_level_index = (this.curr_level_index + 1) % g_levels_data.length;
                 this.game_objects.init_level(g_levels_data[this.curr_level_index]);
-                curr_mode = Game_Mode.Serving;                
+                curr_mode = Game_Mode.Serving;
             } break;
 
 
             case Game_Mode.Won_Game: {
                 player.reset();
-                player.lives = 3;
+                ball.reset();
+                player.lives = 5;
                 this.curr_level_index = 0;
                 this.game_objects.init_level(g_levels_data[0]);
                 curr_mode = Game_Mode.Serving;
@@ -1270,10 +1276,10 @@ class Game {
             let rect_info = compute_rect_info(block_size, ball.radius);
             let P;
             let ball_is_op = ball.is_op_remaining_time > 0;
-            
+
             let beam_P;
             let laser_beams = player.laser_beams;
-            let laser_hit = false;            
+            let laser_hit = false;
             let beam_size = this.game_objects.powerup_size;
             let half_beam_size = smul(0.5, beam_size);
 
@@ -1287,23 +1293,23 @@ class Game {
                         P = new_vector(x, y);
                         P = mul(P, block_size);
                         P = add(P, screen_offset);
-                        rect_info.Po = P;                        
+                        rect_info.Po = P;
                         collision = check_moving_circle_vs_static_rect(ball.P, ball.oldP, rect_info);
-                        
+
                         // Check lasers
                         if (!collision.occurred) {
                             for (let laser_index = 0; laser_index < laser_beams.length; ++laser_index) {
                                 beam_P = laser_beams[laser_index];
-                                if (((beam_P.x + half_beam_size.x) >= P.x) && ((beam_P.x - half_beam_size.x) <= (P.x + beam_size.x)) && 
-                                    (beam_P.y <= (P.y + beam_size.y))) 
+                                if (((beam_P.x + half_beam_size.x) >= P.x) && ((beam_P.x - half_beam_size.x) <= (P.x + beam_size.x)) &&
+                                    (beam_P.y <= (P.y + beam_size.y)))
                                 {
                                     laser_hit = true;
-                                    laser_beams.splice(laser_index, 1);                                    
+                                    laser_beams.splice(laser_index, 1);
                                 }
                             }
                         }
 
-                        if (collision.occurred || laser_hit) {                            
+                        if (collision.occurred || laser_hit) {
                             if (block_id < 7 || ball_is_op) {
                                 block_data[block_index] = 0;
                                 --game_objects.blocks_remaining;
@@ -1322,10 +1328,10 @@ class Game {
                                     game_objects.add_powerup(block_id, block_mid_P);
                                 }
                             }
-                 
+
                             if (!ball_is_op && !laser_hit) {
                                 ball.P = add(ball.P, smul(collision.interpenetration + 1, collision.I));
-                                
+
                                 let speed = magnitude(ball.dP);
                                 ball.dP = smul(speed, collision.R);
                             }
@@ -1337,7 +1343,7 @@ class Game {
             }
         }
 
-    
+
         //
         // Ball vs player
         {
@@ -1350,15 +1356,15 @@ class Game {
 
                 let sign: number = collision.R.y >= 0 ? 1 : -1;
                 let factor = 250 * sign;
-                let dx: number = player.move_target_x - player.P.x;                                    
+                let dx: number = player.move_target_x - player.P.x;
                 let N: Vector2 = noz(new_vector(dx, factor));
-                
+
                 let f: number = (ball.P.x - (player.P.x - 0.5 * player_size.x)) / player_size.x;
-                if ((f >= 0.0 && f < 0.2)) {                        
+                if ((f >= 0.0 && f < 0.2)) {
                     N = noz(new_vector(-2, sign));
                     this.sound.play(SoundID.Paddle_2);
                 }
-                else if ((f >= 0.8 && f <= 1)) {                        
+                else if ((f >= 0.8 && f <= 1)) {
                     N = noz(new_vector(2, sign));
                     this.sound.play(SoundID.Paddle_2);
                 }
@@ -1371,7 +1377,7 @@ class Game {
             }
         }
 
-        
+
         //
         // Ball vs walls
         ball.collided_with_wall();
@@ -1387,13 +1393,13 @@ class Game {
             let player = this.player;
             let ball = this.ball;
             let game_objects = this.game_objects;
-        
+
 
             //
             // Update
             let dt: number = this.last_update == 0 ? 1.0 / 60.0 : t - this.last_update;
 
-            let curr_mode = this.curr_mode;            
+            let curr_mode = this.curr_mode;
             if (curr_mode > Game_Mode.Idle) {
                 player.update(dt);
 
@@ -1402,25 +1408,30 @@ class Game {
                 }
                 else if (curr_mode == Game_Mode.Playing) {
                     //
-                    // Update                    
+                    // Update
                     if (game_objects.blocks_remaining > 0) {
                         ball.update(dt);
                         let picked_up_powerups = game_objects.update(dt, player);
                         for (let powerup of picked_up_powerups) {
-                            switch (powerup.type) {                     
-                                //case Powerup_Type.Last: {} break;
-                                //case Powerup_Type.Multiple_Balls: {} break;
-                                
+                            switch (powerup.type) {
+                                case Powerup_Type.Wide_Paddle: {
+                                    player.make_wide();
+                                    this.sound.play(SoundID.Powerup_1);
+                                } break;
+
+                                case Powerup_Type.Slow_Down: {
+                                    ball.dP = smul(ball.start_speed, noz(ball.dP));
+                                    this.sound.play(SoundID.Powerup_2);
+                                } break;
+
                                 case Powerup_Type.Lasers: {
                                     player.lasers_remaining_time = g_powerup_duration[Powerup_Type.Lasers];
+                                    this.sound.play(SoundID.Powerup_3);
                                 } break;
 
                                 case Powerup_Type.Ball_Is_Op: {
                                     ball.is_op_remaining_time = g_powerup_duration[Powerup_Type.Ball_Is_Op];
-                                } break;
-
-                                case Powerup_Type.Wide_Paddle: {
-                                    player.make_wide();
+                                    this.sound.play(SoundID.Powerup_4);
                                 } break;
                             }
                         }
@@ -1429,13 +1440,13 @@ class Game {
                         if (dead) {
                             curr_mode = Game_Mode.Dead;
                             this.sound.play(SoundID.Lost_Ball);
-                            
+
                             player.reset();
                             game_objects.reset();
-                            ball.reset();                                                
+                            ball.reset();
                         }
                         else {
-                            this.handle_collisions();                            
+                            this.handle_collisions();
                         }
                     }
                     else {
